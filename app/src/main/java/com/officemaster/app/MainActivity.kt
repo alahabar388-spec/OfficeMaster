@@ -147,6 +147,14 @@ class MainActivity : Activity() {
 
     private fun openSelectedDocument() {
         val uri = selectedUri ?: return showMessage("Сначала выбери документ")
+        val mimeType = contentResolver.getType(uri) ?: "*/*"
+        if (mimeType == "application/pdf" || getDisplayName(uri).endsWith(".pdf", ignoreCase = true)) {
+            startActivity(Intent(this, PdfViewerActivity::class.java).apply {
+                putExtra(PdfViewerActivity.EXTRA_URI, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            })
+            return
+        }
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, contentResolver.getType(uri) ?: "*/*")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
