@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
@@ -30,7 +31,7 @@ class MainActivity : Activity() {
         val accent = Color.rgb(58, 119, 230)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(28, 42, 28, 28)
+            setPadding(28, 64, 28, 28)
             setBackgroundColor(background)
         }
         root.addView(TextView(this).apply {
@@ -128,9 +129,20 @@ class MainActivity : Activity() {
             try {
                 contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             } catch (_: SecurityException) { }
-            selectedLabel.text = "Выбран файл: ${uri.lastPathSegment ?: "документ"}"
+            selectedLabel.text = "Выбран файл: ${getDisplayName(uri)}"
             openSelectedDocument()
         }
+    }
+
+    private fun getDisplayName(uri: Uri): String {
+        var name = "документ"
+        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0) name = cursor.getString(index) ?: name
+            }
+        }
+        return name
     }
 
     private fun openSelectedDocument() {
