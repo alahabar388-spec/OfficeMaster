@@ -1,0 +1,28 @@
+name: NeuroHub Android APK
+on:
+  push:
+    branches: [neurohub]
+    paths: ['NeuroHub/android/**', '.github/workflows/neurohub-android.yml']
+  pull_request:
+    branches: [neurohub]
+    paths: ['NeuroHub/android/**', '.github/workflows/neurohub-android.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        working-directory: NeuroHub/android
+        run: gradle assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NeuroHub-debug-apk
+          path: NeuroHub/android/app/build/outputs/apk/debug/app-debug.apk
